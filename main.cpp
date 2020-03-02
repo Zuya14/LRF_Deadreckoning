@@ -103,4 +103,16 @@ int main(){
 
 	test();
 
+	//int a[3] = { 1, 2, 3 };
+	//std::vector<int> v(std::begin(a), std::end(a));
+
+	//std::cout << typeid(a).name() << std::endl << std::endl;
+
+	//for (auto& x : a)
+	//	std::cout << x << " ";
+	//std::cout << std::endl;
+
+	//for (auto& x : v)
+	//	std::cout << x << " ";
+	//std::cout << std::endl;
 }
