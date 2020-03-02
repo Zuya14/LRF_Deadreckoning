@@ -12,15 +12,15 @@
 #include "float.h"
 
 const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
-const bool   ScanMatcher::NEAREST_FULL = false;         // NEAREST_FULL ? 全探索 : 近傍探索
+const bool   ScanMatcher::NEAREST_FULL = false;        // NEAREST_FULL ? 全探索 : 近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
-const int    ScanMatcher::NEAREST_K = 50;             // 2k+1近傍探索
+const int    ScanMatcher::NEAREST_K = 25;              // 2k+1近傍探索
 
-const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.10;    // RANSACのサンプル率
-const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 50; // RANSACの試行回数 
+const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.10;  // RANSACのサンプル率
+const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 10; // RANSACの試行回数 
 
-const double ScanMatcher::EPS = 1e-6;           // マッチングの改善がEPS以下なら終了
-const int    ScanMatcher::MAX_ITERATIONS = 30; // マッチングの最大試行回数
+const double ScanMatcher::EPS = 1e-6;          // マッチングの改善がEPS以下なら終了
+const int    ScanMatcher::MAX_ITERATIONS = 10; // マッチングの最大試行回数
 
 ScanMatcher::ScanMatcher() :
 	mT(Eigen::MatrixXd::Identity(3, 3)),
