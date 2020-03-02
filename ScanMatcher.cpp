@@ -16,11 +16,11 @@
 #endif
 
 const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
-const bool   ScanMatcher::NEAREST_FULL = true;        // NEAREST_FULL ? 全探索 : 近傍探索
+const bool   ScanMatcher::NEAREST_FULL = true;         // NEAREST_FULL ? 全探索 : 近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
-const int    ScanMatcher::NEAREST_K = 50;              // 2k+1近傍探索
+const int    ScanMatcher::NEAREST_K = 100;              // 2k+1近傍探索
 
-const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.10;  // RANSACのサンプル率
+const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.1;  // RANSACのサンプル率
 const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 5; // RANSACの試行回数 
 
 const double ScanMatcher::EPS = 1e-6;          // マッチングの改善がEPS以下なら終了
@@ -313,13 +313,13 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 		index = 0;
 		dist = 0;
 		#ifdef _OPENMP
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		#endif
 		for (int j = 0; j < row_dst; j++) {
 			vec_dst = dst.block<1, 2>(j, 0).transpose();
 			dist = distance(vec_src, vec_dst);
 			#ifdef _OPENMP
-			#pragma omp critical
+			//#pragma omp critical
 			#endif
 			{
 				if (dist < min) {
@@ -360,13 +360,13 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 			kt = row_dst - 1;
 
 		#ifdef _OPENMP
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		#endif
 		for (int j = ks; j <= kt; j++) {
 			vec_dst = dst.block<1, 2>(j, 0).transpose();
 			dist = distance(vec_src, vec_dst);
 			#ifdef _OPENMP
-			#pragma omp critical
+			//#pragma omp critical
 			#endif
 			{
 				if (dist < min) {

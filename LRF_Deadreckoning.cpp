@@ -45,7 +45,18 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 	// 単位変換: [m] -> [mm]
 	std::for_each(pts.begin(), pts.end(), [](double& distance) { distance *= 1000.0; });
 
-	mPoints = Eigen::MatrixXd(POINT_NUM, 2);
+	// ダウンサンプリング（簡易）
+
+	std::vector<double> pts_temp;
+	pts_temp.reserve(pts.size()/2);
+
+	for(auto it = std::begin(pts); it <= std::end(pts); it+=2){
+		pts_temp.push_back(*it);
+	}
+
+	pts = std::move(pts_temp);
+
+	mPoints = Eigen::MatrixXd(pts.size(), 2);
 
 	#ifdef _OPENMP
 	#pragma omp parallel for
@@ -272,7 +283,7 @@ void LRF_Deadreckoning::mergeIndices(std::vector<std::vector<int>> segIndices, d
 	std::sort(choiceIndices.begin(), choiceIndices.end());
 
 	std::cout << "segment: " << segIndices.size() << std::endl;
-	std::cout << choiceIndices.size() << " > " << k << std::endl;
+	std::cout << "choice: " << choiceIndices.size() << " > " << k << std::endl;
 
 	//for (int& i : choiceIndices) {
 	//	std::cout << i << " ";
