@@ -3,6 +3,19 @@
 #include <cmath>
 #include <iostream>
 
+#ifdef DEBUG_OPENCV_
+#include <opencv2/opencv.hpp>
+#endif /* DEBUG_OPENCV_ */
+
+#ifdef DEBUG_MATPLOT_
+#include <matplotlib-cpp/matplotlibcpp.h>
+namespace plt = matplotlibcpp; 
+
+#include <string>
+#include <unordered_map>
+static const double interval = 0.001;
+#endif /* DEBUG_MATPLOT_ */
+
 const int LRF_Deadreckoning::POINT_NUM = 1081;
 const double LRF_Deadreckoning::ANGLE_RANGE = 270.0;
 const double LRF_Deadreckoning::ANGLE_OFFSET = -45.0;
@@ -22,7 +35,7 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 
 	mPoints = Eigen::MatrixXd(POINT_NUM, 2);
 
-	for (size_t i = 0; i < pts.size(); i++) {
+	for (int i = 0; i < pts.size(); i++) {
 		double degree = (i / (double)(POINT_NUM - 1)) * ANGLE_RANGE + ANGLE_OFFSET;
 		double theta = degToRad(degree);
 		mPoints(i, 0) = pts[i] * std::cos(theta);
@@ -31,6 +44,10 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 
 	#ifdef DEBUG_OPENCV_
 	//drawPoint(mPoints, 800, 800);
+	#endif /* DEBUG_OPENCV_ */
+
+	#ifdef DEBUG_MATPLOT_
+	//drawPoint(mPoints);
 	#endif /* DEBUG_OPENCV_ */
 
 	//std::cout << mPoints << std::endl << std::endl;
@@ -59,6 +76,12 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 		//cv::waitKey(1);
 		cv::waitKey(1000);
 		#endif /* DEBUG_OPENCV_ */
+
+		#ifdef DEBUG_MATPLOT_
+		drawPoints();
+		drawMatchedPoints();
+		plt::pause(interval);
+		#endif /* DEBUG_OPENCV_ */
 	}
 
 	mPrevPoints = mPoints;
@@ -74,7 +97,7 @@ void LRF_Deadreckoning::drawPoint(Eigen::MatrixXd pts, int width, int height) {
 	cv::Point center(width / 2, height / 2);
 	int row = pts.rows();
 	double x, y;
-	for (size_t i = 0; i < row; i++) {
+	for (int i = 0; i < row; i++) {
 		x = pts(i, 0) / 10.0;
 		y = pts(i, 1) / 10.0;
 		cv::circle(src, cv::Point(x, -y) + center, 1, cv::Scalar(0, 0, 255));
@@ -90,7 +113,7 @@ void LRF_Deadreckoning::drawPoints(int width, int height) {
 	cv::Point center(width / 2, height / 2);
 	int row = mPoints.rows();
 	double x1, y1, x2, y2;
-	for (size_t i = 0; i < row; i++){
+	for (int i = 0; i < row; i++){
 		x1 = mPrevPoints(i, 0) / 10.0;
 		y1 = mPrevPoints(i, 1) / 10.0;
 		x2 = mPoints(i, 0) / 10.0;
@@ -113,7 +136,7 @@ void LRF_Deadreckoning::drawMatchedPoints(int width, int height) {
 	Eigen::MatrixXd pt;
 	double cos = std::cos(m_dtheta);
 	double sin = std::sin(m_dtheta);
-	for (size_t i = 0; i < row; i++) {
+	for (int i = 0; i < row; i++) {
 
 		x = mPrevPoints(i, 0);
 		y = mPrevPoints(i, 1);
@@ -131,3 +154,90 @@ void LRF_Deadreckoning::drawMatchedPoints(int width, int height) {
 	//cv::waitKey(1000);
 }
 #endif /* DEBUG_OPENCV_ */
+
+#ifdef DEBUG_MATPLOT_
+void LRF_Deadreckoning::drawPoint(Eigen::MatrixXd pts) {
+	int row = pts.rows();
+	std::vector<double> x(row), y(row);
+	for (int i = 0; i < row; i++) {
+		x.at(i) = pts(i, 0);
+		y.at(i) = pts(i, 1);
+	}
+
+	std::unordered_map<std::string, std::string> um1{{"c", "red"}, {"marker", "."}, {"linewidths", "0"}};
+	plt::clf();
+	plt::xlim(-3000.0, 3000.0);
+	plt::ylim(-3000.0, 3000.0);
+	plt::scatter(x, y, 10, um1);
+
+	std::unordered_map<std::string, std::string> um2{{"c", "black"}, {"marker", "*"}};
+	std::vector<double> x0(1,0), y0(1,0);
+	plt::scatter(x0, y0, 50, um2);
+	//plt::show();	
+	plt::pause(interval);
+}
+
+void LRF_Deadreckoning::drawPoints() {
+	int row = mPoints.rows();
+	std::vector<double> x1(row), y1(row);
+	std::vector<double> x2(row), y2(row);
+	for (int i = 0; i < row; i++) {
+		x1.at(i) = mPrevPoints(i, 0);
+		y1.at(i) = mPrevPoints(i, 1);
+		x2.at(i) = mPoints(i, 0);
+		y2.at(i) = mPoints(i, 1);
+	}
+
+	plt::figure(1);
+	plt::clf();
+	
+	std::unordered_map<std::string, std::string> um0{{"c", "blue"}, {"marker", "."}, {"linewidths", "0"}};
+	//plt::subplot(1, 2, 1);
+	plt::xlim(-3000.0, 3000.0);
+	plt::ylim(-3000.0, 3000.0);
+	plt::scatter(x1, y1, 10, um0);
+
+	std::unordered_map<std::string, std::string> um1{{"c", "red"}, {"marker", "."}, {"linewidths", "0"}};
+	plt::scatter(x2, y2, 10, um1);
+
+	std::unordered_map<std::string, std::string> um2{{"c", "black"}, {"marker", "*"}};
+	std::vector<double> x0(1,0), y0(1,0);
+	plt::scatter(x0, y0, 50, um2);	
+	//plt::pause(interval);
+}
+
+void LRF_Deadreckoning::drawMatchedPoints() {
+	int row = mPoints.rows();
+	std::vector<double> x1(row), y1(row);
+	std::vector<double> x2(row), y2(row);
+	double cos = std::cos(m_dtheta);
+	double sin = std::sin(m_dtheta);
+	double x, y;
+	for (int i = 0; i < row; i++) {
+		x = mPrevPoints(i, 0);
+		y = mPrevPoints(i, 1);
+		x1.at(i) = x * cos - y * sin + m_dx;
+		y1.at(i) = x * sin + y * cos + m_dy;
+		x2.at(i) = mPoints(i, 0);
+		y2.at(i) = mPoints(i, 1);
+	}
+
+	plt::figure(2);
+	plt::clf();
+
+	std::unordered_map<std::string, std::string> um0{{"c", "blue"}, {"marker", "."}, {"linewidths", "0"}};
+	//plt::subplot(1, 2, 2);
+	plt::xlim(-3000.0, 3000.0);
+	plt::ylim(-3000.0, 3000.0);
+	plt::scatter(x1, y1, 10, um0);
+
+	std::unordered_map<std::string, std::string> um1{{"c", "red"}, {"marker", "."}, {"linewidths", "0"}};
+	plt::scatter(x2, y2, 10, um1);
+
+	std::unordered_map<std::string, std::string> um2{{"c", "black"}, {"marker", "*"}};
+	std::vector<double> x0(1,0), y0(1,0);
+	plt::scatter(x0, y0, 50, um2);
+	//plt::show();	
+	//plt::pause(interval);
+}
+#endif /* DEBUG_MATPLOT_ */

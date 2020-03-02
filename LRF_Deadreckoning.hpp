@@ -1,11 +1,8 @@
 #ifndef LRF_DEADRECKONING_HPP_
 #define LRF_DEADRECKONING_HPP_
 
+//#define DEBUG_MATPLOT_
 //#define DEBUG_OPENCV_
-
-#ifdef DEBUG_OPENCV_
-#include <opencv2/opencv.hpp>
-#endif /* DEBUG_OPENCV_ */
 
 #include <vector>
 
@@ -18,10 +15,14 @@ public:
 
 	bool update(std::vector<double> pts);
 
-private:
-	//std::vector<Point> mPoints;
-	//std::vector<Point> mPrevPoints;
+	double getDX(){ return m_dx; }
+	double getDY(){ return m_dy; }
+	double getDTheta(){ return m_dtheta; }
 
+	double getX(){ return m_x; }
+	double getY(){ return m_y; }
+	double getTheta(){ return m_theta; }
+private:
 	double degToRad(double x);
 
 	ScanMatcher mScanMatcher;
@@ -39,12 +40,17 @@ private:
 	static const double ANGLE_OFFSET;
 	static const double PI;
 
-
 	#ifdef DEBUG_OPENCV_
 	void drawPoint(Eigen::MatrixXd pts, int width, int height);
 	void drawPoints(int width, int height);
 	void drawMatchedPoints(int width, int height);
 	#endif /* DEBUG_OPENCV_ */
+
+	#ifdef DEBUG_MATPLOT_
+	void drawPoint(Eigen::MatrixXd pts);
+	void drawPoints();
+	void drawMatchedPoints();
+	#endif /* DEBUG_MATPLOT_ */
 };
 
 #endif /* LRF_DEADRECKONING_HPP_ */

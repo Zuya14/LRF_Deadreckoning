@@ -1,3 +1,5 @@
-g++ -O2 LRF_Deadreckoning main.cpp LRF_Deadreckoning.cpp ScanMatcher.cpp -std=c++11 -std=c++14 -I /usr/local/include/eigen3
+g++ -o LRF_Deadreckoning main.cpp LRF_Deadreckoning.cpp ScanMatcher.cpp -std=c++11 -std=c++14 -I /usr/local/include/ 
 
-g++ LRF_Deadreckoning main.cpp LRF_Deadreckoning.cpp ScanMatcher.cpp -std=c++11 -std=c++14 -I /usr/local/include/ 
+// matplotlibでプロットする方
+g++ -o LRF_Deadreckoning main.cpp LRF_Deadreckoning.cpp ScanMatcher.cpp -std=c++11 -std=c++14 -I/usr/local/include/ -I/usr/include/python2.7 -lpython2.7 -D DEBUG_MATPLOT_
+
