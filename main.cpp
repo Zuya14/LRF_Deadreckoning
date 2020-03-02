@@ -80,7 +80,7 @@ void test() {
 		std::istringstream iss(read_line);
 
 		while (std::getline(iss, read_cell, '\t')) {
-			points.push_back(std::stod(read_cell) * 1000.0);
+			points.push_back(std::stod(read_cell));
 		}
 
 		//printf("points.size:%u\n", points.size());
