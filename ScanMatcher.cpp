@@ -18,13 +18,13 @@
 const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
 const bool   ScanMatcher::NEAREST_FULL = true;        // NEAREST_FULL ? 全探索 : 近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
-const int    ScanMatcher::NEAREST_K = 25;              // 2k+1近傍探索
+const int    ScanMatcher::NEAREST_K = 50;              // 2k+1近傍探索
 
 const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.10;  // RANSACのサンプル率
-const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 10; // RANSACの試行回数 
+const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 5; // RANSACの試行回数 
 
 const double ScanMatcher::EPS = 1e-6;          // マッチングの改善がEPS以下なら終了
-const int    ScanMatcher::MAX_ITERATIONS = 10; // マッチングの最大試行回数
+const int    ScanMatcher::MAX_ITERATIONS = 5; // マッチングの最大試行回数
 
 ScanMatcher::ScanMatcher() :
 	mT(Eigen::MatrixXd::Identity(3, 3)),
@@ -149,13 +149,18 @@ void ScanMatcher::icp_ransac(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
 
 		error = min_error;
 
-		if (std::abs(prev_error - error) < EPS) {
-			break;
+		if(error < 10000){
+			if (std::abs(prev_error - error) < EPS) {
+				break;
+			}
 		}
-
 		prev_error = error;
 	}
-	printf("ITER: %d, EROOR: %.2f\n", iter, error);
+	
+	if(error < 10000)
+		printf("ITER: %d, EROOR: %.2f\n", iter, error);
+	else
+		printf("ITER: %d, EROOR: too large\n", iter);
 
 	//mT = fit_transform(A_move.transpose(), A);
 	mT = fit_transform(A, A_move.transpose());
@@ -198,12 +203,15 @@ void ScanMatcher::icp(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B) {
 
 		error = std::accumulate(mPtPairsDistance.begin(), mPtPairsDistance.end(), 0.0) / mPtPairsDistance.size();
 		
-		if (std::abs(prev_error - error) < EPS) {
-			break;
+		if(error < 10000){
+			if (std::abs(prev_error - error) < EPS) {
+				break;
+			}
 		}
 
 		prev_error = error;
 	}
+
 	printf("ITER: %d\n", iter);
 
 	mT = fit_transform(A, A_move.transpose());

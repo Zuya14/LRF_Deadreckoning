@@ -462,7 +462,7 @@ void LRF_Deadreckoning::drawMatchedPoints() {
 }
 
 void LRF_Deadreckoning::drawSegmentation(int num) {
-	static std::String colors[] = {
+	static std::string colors[] = {
 		"red",
 		"blue",
 		"yellow",
