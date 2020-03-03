@@ -15,16 +15,22 @@
 #include <omp.h>
 #endif
 
-const double ScanMatcher::NEIGHBOR_DISTANCE = 300.0; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
+#define NEIGHBOR_
+
+#ifdef NEIGHBOR_
+const double ScanMatcher::NEIGHBOR_DISTANCE = 500.0; // [mm] これより近い点はご近所さん。
+#else
+const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX;
+#endif // NEIGHBOR_
 const bool   ScanMatcher::NEAREST_FULL = true;         // NEAREST_FULL ? 全探索 : 近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
 const int    ScanMatcher::NEAREST_K = 100;              // 2k+1近傍探索
 
-const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.1;  // RANSACのサンプル率
-const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 5; // RANSACの試行回数 
+const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.2;  // RANSACのサンプル率
+const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 3; // RANSACの試行回数 
 
 const double ScanMatcher::EPS = 1e-6;          // マッチングの改善がEPS以下なら終了
-const int    ScanMatcher::MAX_ITERATIONS = 5; // マッチングの最大試行回数
+const int    ScanMatcher::MAX_ITERATIONS = 3; // マッチングの最大試行回数
 
 ScanMatcher::ScanMatcher() :
 	mT(Eigen::MatrixXd::Identity(3, 3))
@@ -46,6 +52,7 @@ void ScanMatcher::icp_ransac(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
 	int sample_n = rowA * RANSAC_SAMPLE_RATE;
 	Eigen::Matrix3d T_sample_best;
 	Eigen::MatrixXd A_sample(sample_n, 2);
+	Eigen::MatrixXd A_sample_neighbor;
 	Eigen::MatrixXd B_sample(sample_n, 2);
 	Eigen::MatrixXd choice_sample = Eigen::MatrixXd::Ones(2, sample_n);
 	Eigen::Matrix3d T_sample;
@@ -99,14 +106,33 @@ void ScanMatcher::icp_ransac(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
 				closest(A_sample, B_sample, NEAREST_K);
 			}
 
+			#ifdef NEIGHBOR_
+
+			A_sample_neighbor = Eigen::MatrixXd(mPairNum, 2);
+			choice_sample = Eigen::MatrixXd::Ones(2, mPairNum);
+			int pair_i = 0;
+
+			for (int j = 0; j < sample_n; j++) {
+				if (mPtPairsDistance[j] < NEIGHBOR_DISTANCE) {
+					A_sample_neighbor.block<1, 2>(pair_i, 0) = A_sample.block<1, 2>(j, 0);
+					choice_sample.block<2, 1>(0, pair_i) = B_sample.block<1, 2>(mPtPairsIndex[j], 0);
+					pair_i++;
+				}
+			}
+			T_sample = fit_transform(A_sample_neighbor, choice_sample.transpose());
+
+			#else
+
 			#ifdef _OPENMP
 			#pragma omp parallel for
 			#endif
 			for (int j = 0; j < sample_n; j++) {
 				choice_sample.block<2, 1>(0, j) = B_sample.block<1, 2>(mPtPairsIndex[j], 0);
 			}
-
 			T_sample = fit_transform(A_sample, choice_sample.transpose());
+
+			#endif // NEIGHBOR_
+
 			A_temp2 = T_sample * A_temp;
 
 			#ifdef _OPENMP
@@ -293,6 +319,7 @@ std::vector<int> ScanMatcher::sorted_random_select(int n, int min, int max) {
 
 // 距離が近い点のペアを探す
 void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst) {
+	mPairNum = 0;
 	mPtPairsDistance.clear();
 	mPtPairsIndex.clear();
 
@@ -323,9 +350,10 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 				if (dist < min) {
 					min = dist;
 					index = j;
+				}
 			}
 		}
-		}
+		if (min < NEIGHBOR_DISTANCE) mPairNum++;
 		mPtPairsDistance.push_back(min);
 		mPtPairsIndex.push_back(index);
 	}
@@ -334,6 +362,7 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 
 // インデックスで(2k+1)近傍。距離が近い点のペアを探す
 void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst, int k) {
+	mPairNum = 0;
 	mPtPairsDistance.clear();
 	mPtPairsIndex.clear();
 	
@@ -345,6 +374,8 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 	double min = 0;
 	double dist = 0;
 	int index = 0;
+
+	mPairNum = 0;
 
 	for (int i = 0; i < row_src; i++) {
 		vec_src = src.block<1, 2>(i, 0).transpose();
@@ -373,6 +404,7 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 				}
 			}
 		}
+		if (min < NEIGHBOR_DISTANCE) mPairNum++;
 		mPtPairsDistance.push_back(min);
 		mPtPairsIndex.push_back(index);
 	}
