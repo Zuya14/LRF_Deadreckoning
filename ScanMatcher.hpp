@@ -29,8 +29,8 @@ private:
 
 	static const double NEIGHBOR_DISTANCE;
 	static const bool NEAREST_FULL;
-	static const bool INDEX_DEPEND;
 	static const int NEAREST_K;
+	static const bool INDEX_DEPEND;
 	static const double RANSAC_SAMPLE_RATE;
 	static const int RANSAC_MAX_ITERATIONS;
 	static const int MAX_ITERATIONS;
