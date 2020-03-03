@@ -58,9 +58,9 @@ void test_pt() {
 
 void test() {
 	// std::string filename = "lidar_10_short.txt";
-	//std::string filename = "lidar_10_long.txt";
+	std::string filename = "lidar_10_long.txt";
 	//std::string filename = "lidar_25_short.txt";
-	std::string filename = "lidar_25_long.txt";
+	//std::string filename = "lidar_25_long.txt";
 
 	std::ifstream read_file(filename, std::ios::in);
 	std::string read_line;

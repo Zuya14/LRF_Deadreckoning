@@ -22,8 +22,10 @@ static const double interval = 0.001;
 #include <omp.h>
 #endif
 
-const double LRF_Deadreckoning::SEGMENTATION_DISTANCE = 100.0;
-const double LRF_Deadreckoning::SEGMENTATION_MERGE_RATE = 0.5;
+#define DOWN_SAMPLING_
+
+const double LRF_Deadreckoning::SEGMENTATION_DISTANCE = 80.0;
+const double LRF_Deadreckoning::SEGMENTATION_MERGE_RATE = 0.9;
 const int LRF_Deadreckoning::POINT_NUM = 1081;// これ動的にしたい...
 const double LRF_Deadreckoning::ANGLE_RANGE = 270.0;
 const double LRF_Deadreckoning::ANGLE_OFFSET = -45.0;
@@ -45,12 +47,12 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 	// 単位変換: [m] -> [mm]
 	std::for_each(pts.begin(), pts.end(), [](double& distance) { distance *= 1000.0; });
 
+#ifdef DOWN_SAMPLING_
 	// ダウンサンプリング（簡易）
-
 	std::vector<double> pts_temp;
-	pts_temp.reserve(pts.size()/2);
+	pts_temp.reserve(pts.size() / 2);
 
-	for(auto it = std::begin(pts); it <= std::end(pts); it+=2){
+	for (auto it = std::begin(pts); it <= std::end(pts); it += 2) {
 		pts_temp.push_back(*it);
 	}
 
@@ -62,11 +64,22 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 	#pragma omp parallel for
 	#endif
 	for (int i = 0; i < pts.size(); i++) {
+		double degree = (2.0 * i / (double)(POINT_NUM - 1)) * ANGLE_RANGE + ANGLE_OFFSET;
+		double theta = degToRad(degree);
+		mPoints(i, 0) = pts[i] * std::cos(theta);
+		mPoints(i, 1) = pts[i] * std::sin(theta);
+	}
+#else
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
+	for (int i = 0; i < pts.size(); i++) {
 		double degree = (i / (double)(POINT_NUM - 1)) * ANGLE_RANGE + ANGLE_OFFSET;
 		double theta = degToRad(degree);
 		mPoints(i, 0) = pts[i] * std::cos(theta);
 		mPoints(i, 1) = pts[i] * std::sin(theta);
 	}
+#endif // DEBUG
 
 	mergeIndices(segmentationIndex(pts, 10), SEGMENTATION_MERGE_RATE);
 
@@ -113,7 +126,7 @@ bool LRF_Deadreckoning::update(std::vector<double> pts) {
 		#ifdef DEBUG_OPENCV_
 		drawPoints(800, 800);
 		drawMatchedPoints(800, 800);
-		cv::waitKey(1);
+		cv::waitKey(0);
 		//cv::waitKey(1000);
 		#endif /* DEBUG_OPENCV_ */
 
@@ -276,6 +289,7 @@ void LRF_Deadreckoning::mergeIndices(std::vector<std::vector<int>> segIndices, d
 	choiceIndices.reserve(n);
 
 	for (std::vector<int>& v : segIndices) {
+		if (v.size() < 10) break;
 		std::copy(v.begin(), v.end(), std::back_inserter(choiceIndices));
 		if (choiceIndices.size() > k) break;
 	}
