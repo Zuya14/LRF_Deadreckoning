@@ -25,6 +25,7 @@ private:
 	Eigen::Matrix3d mT; // [R|T]:3*3
 	std::vector<double> mPtPairsDistance;
 	std::vector<int> mPtPairsIndex;
+	int mPairNum;
 
 	static const double NEIGHBOR_DISTANCE;
 	static const bool NEAREST_FULL;

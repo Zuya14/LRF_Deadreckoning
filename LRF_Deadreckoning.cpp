@@ -31,10 +31,7 @@ const double LRF_Deadreckoning::ANGLE_RANGE = 270.0;
 const double LRF_Deadreckoning::ANGLE_OFFSET = -45.0;
 const double LRF_Deadreckoning::PI = 3.14159265358979323846;
 
-LRF_Deadreckoning::LRF_Deadreckoning() :
-	mScanMatcher(),
-	m_dx(), m_dy(), m_dtheta(),
-	m_x(), m_y(), m_theta()
+LRF_Deadreckoning::LRF_Deadreckoning() 
 {}
 
 double LRF_Deadreckoning::degToRad(double x) {

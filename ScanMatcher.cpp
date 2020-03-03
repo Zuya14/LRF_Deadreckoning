@@ -15,7 +15,7 @@
 #include <omp.h>
 #endif
 
-const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX; // [mm] ‚±‚ê‚æ‚è‹ß‚¢“_‚Í‚²‹ßŠ‚³‚ñBDBL_MAX‚ÅOK‚È‚Í‚¸
+const double ScanMatcher::NEIGHBOR_DISTANCE = 300.0; // [mm] ‚±‚ê‚æ‚è‹ß‚¢“_‚Í‚²‹ßŠ‚³‚ñBDBL_MAX‚ÅOK‚È‚Í‚¸
 const bool   ScanMatcher::NEAREST_FULL = true;         // NEAREST_FULL ? ‘S’Tõ : ‹ß–T’Tõ
 const bool   ScanMatcher::INDEX_DEPEND = false;        // ƒCƒ“ƒfƒbƒNƒX‚É‚æ‚é‹ß–T’Tõ‚ğ‚·‚é‚©
 const int    ScanMatcher::NEAREST_K = 100;              // 2k+1‹ß–T’Tõ
@@ -27,9 +27,7 @@ const double ScanMatcher::EPS = 1e-6;          // ƒ}ƒbƒ`ƒ“ƒO‚Ì‰ü‘P‚ªEPSˆÈ‰º‚È‚ç
 const int    ScanMatcher::MAX_ITERATIONS = 5; // ƒ}ƒbƒ`ƒ“ƒO‚ÌÅ‘ås‰ñ”
 
 ScanMatcher::ScanMatcher() :
-	mT(Eigen::MatrixXd::Identity(3, 3)),
-	mPtPairsDistance(),
-	mPtPairsIndex()
+	mT(Eigen::MatrixXd::Identity(3, 3))
 {}
 
 void ScanMatcher::icp_ransac(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B) {
