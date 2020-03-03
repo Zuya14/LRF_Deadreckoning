@@ -65,10 +65,15 @@ void test() {
 	std::ifstream read_file(filename, std::ios::in);
 	std::string read_line;
 
+	if(!read_file){
+		printf("can't find %s\n", filename);
+		return;
+	}	
+
 	//printf("reading %s\n", filename);
 
 	std::vector<double> points;
-	points.reserve(1082);
+	points.reserve(1081);
 
 	LRF_Deadreckoning lrfDR;
 
