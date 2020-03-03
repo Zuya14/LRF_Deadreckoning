@@ -66,16 +66,19 @@ void test() {
 	std::string read_line;
 
 	if(!read_file){
-		printf("can't find %s\n", filename);
+		printf("can't find %s\n", filename.c_str());
 		return;
 	}	
 
-	//printf("reading %s\n", filename);
+	//printf("reading %s\n", filename.c_str());
 
 	std::vector<double> points;
 	points.reserve(1081);
 
 	LRF_Deadreckoning lrfDR;
+
+	double sum_time = 0.0;
+	int count = 0;
 
 	while (!read_file.eof()) {
 		points.clear();
@@ -96,10 +99,15 @@ void test() {
 			bool success = lrfDR.update(points);
 			end = std::chrono::system_clock::now();
 			double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000.0);
-			if (success)
+			if (success){
 				printf("%f[ms]\n\n", time);
+				sum_time += time;
+				count++;
+			}
 		}
 	}
+
+	printf("ave_time: %f[ms]\n\n", sum_time/count);
 }
 
 int main(){

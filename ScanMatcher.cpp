@@ -15,7 +15,7 @@
 #include <omp.h>
 #endif
 
-const double ScanMatcher::NEIGHBOR_DISTANCE = 300.0; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
+const double ScanMatcher::NEIGHBOR_DISTANCE = DBL_MAX;//300.0; // [mm] これより近い点はご近所さん。DBL_MAXでOKなはず
 const bool   ScanMatcher::NEAREST_FULL = true;         // NEAREST_FULL ? 全探索 : 近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
 const int    ScanMatcher::NEAREST_K = 100;              // 2k+1近傍探索
@@ -53,7 +53,7 @@ void ScanMatcher::icp_ransac(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B)
 	double error_temp = 0;
 
 	#ifdef _OPENMP
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	#endif
 	for (int j = 0; j < rowA; j++) {
 		A_move.block<2, 1>(0, j) = A.block<1, 2>(j, 0).transpose();
@@ -273,7 +273,7 @@ std::vector<int> ScanMatcher::random_select(int n, int min, int max) {
 
 	// tmpのn番目までシャッフル
 	#ifdef _OPENMP
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	#endif
 	for (int i = 0; i < n; ++i) {
 		int pos = std::uniform_int_distribution<>(i, tmp.size() - 1)(engine);
@@ -299,33 +299,33 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 	int row_src = src.rows();
 	int row_dst = dst.rows();
 
-	Eigen::Vector2d vec_src, vec_dst;
+	Eigen::Vector2d vec_src;
 
 	double min = 0;
-	double dist = 0;
 	int index = 0;
 
 	for (int i = 0; i < row_src; i++) {
 		vec_src = src.block<1, 2>(i, 0).transpose();
 		min = NEIGHBOR_DISTANCE;
 		index = 0;
-		dist = 0;
+{
 		#ifdef _OPENMP
-		//#pragma omp parallel for
+		#pragma omp parallel for
 		#endif
 		for (int j = 0; j < row_dst; j++) {
-			vec_dst = dst.block<1, 2>(j, 0).transpose();
-			dist = distance(vec_src, vec_dst);
+			double dist = distance(vec_src, dst.block<1, 2>(j, 0).transpose());
+
 			#ifdef _OPENMP
-			//#pragma omp critical
+			#pragma omp critical
 			#endif
 			{
 				if (dist < min) {
 					min = dist;
 					index = j;
+				}
 			}
 		}
-		}
+}
 		mPtPairsDistance.push_back(min);
 		mPtPairsIndex.push_back(index);
 	}
@@ -340,16 +340,15 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 	int row_src = src.rows();
 	int row_dst = dst.rows();
 
-	Eigen::Vector2d vec_src, vec_dst;
+	Eigen::Vector2d vec_src;
 
 	double min = 0;
-	double dist = 0;
 	int index = 0;
 
 	for (int i = 0; i < row_src; i++) {
 		vec_src = src.block<1, 2>(i, 0).transpose();
 		min = NEIGHBOR_DISTANCE;
-		index = dist = 0;
+		index = 0;
 		int ks = i - k;
 		int kt = i + k;
 		if (0 > ks)
@@ -358,13 +357,13 @@ void ScanMatcher::closest(const Eigen::MatrixXd& src, const Eigen::MatrixXd& dst
 			kt = row_dst - 1;
 
 		#ifdef _OPENMP
-		//#pragma omp parallel for
+		#pragma omp parallel for
 		#endif
 		for (int j = ks; j <= kt; j++) {
-			vec_dst = dst.block<1, 2>(j, 0).transpose();
-			dist = distance(vec_src, vec_dst);
+			double dist = distance(vec_src, dst.block<1, 2>(j, 0).transpose());
+
 			#ifdef _OPENMP
-			//#pragma omp critical
+			#pragma omp critical
 			#endif
 			{
 				if (dist < min) {
