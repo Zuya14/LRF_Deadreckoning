@@ -2,7 +2,7 @@
 #define LRF_DEADRECKONING_HPP_
 
 //#define DEBUG_MATPLOT_
-#define DEBUG_OPENCV_
+//#define DEBUG_OPENCV_
 
 #include <vector>
 
