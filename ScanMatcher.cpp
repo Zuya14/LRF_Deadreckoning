@@ -28,7 +28,7 @@ const int    ScanMatcher::NEAREST_K = 100;             // 2k+1近傍探索
 const bool   ScanMatcher::INDEX_DEPEND = false;        // インデックスによる近傍探索をするか
 
 const double ScanMatcher::RANSAC_SAMPLE_RATE = 0.1;  // RANSACのサンプル率
-const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 3; // RANSACの試行回数 
+const int    ScanMatcher::RANSAC_MAX_ITERATIONS = 5; // RANSACの試行回数 
 
 const double ScanMatcher::EPS = 1e-6;          // マッチングの改善がEPS以下なら終了
 const int    ScanMatcher::MAX_ITERATIONS = 3; // マッチングの最大試行回数

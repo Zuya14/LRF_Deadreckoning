@@ -15,7 +15,7 @@ namespace plt = matplotlibcpp;
 
 #include <string>
 #include <unordered_map>
-static const double interval = 0.001;
+static const double interval = 0.5;
 #endif /* DEBUG_MATPLOT_ */
 
 #ifdef _OPENMP
@@ -25,7 +25,7 @@ static const double interval = 0.001;
 #define DOWN_SAMPLING_
 
 const double LRF_Deadreckoning::SEGMENTATION_DISTANCE = 80.0;
-const double LRF_Deadreckoning::SEGMENTATION_MERGE_RATE = 0.9;
+const double LRF_Deadreckoning::SEGMENTATION_MERGE_RATE = 0.8;
 const int LRF_Deadreckoning::POINT_NUM = 1081;// ‚±‚ê“®“I‚É‚µ‚½‚¢...
 const double LRF_Deadreckoning::ANGLE_RANGE = 270.0;
 const double LRF_Deadreckoning::ANGLE_OFFSET = -45.0;
