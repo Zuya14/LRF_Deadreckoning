@@ -218,7 +218,7 @@ std::vector<std::vector<int>> LRF_Deadreckoning::segmentationIndex(std::vector<d
 
 	// SEGMENTATION_DISTANCE‚æ‚è‹ß‚¢“_‚ğ“¯‚¶–Ø‚É
 	#ifdef _OPENMP
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	#endif
 	for (int range = 1; range <= k; range++) {
 		for (int i = 0; i + k < n; i++) {
@@ -241,7 +241,7 @@ std::vector<std::vector<int>> LRF_Deadreckoning::segmentationIndex(std::vector<d
 	std::vector<int> foundParent; // Še–Ø‚Ìª
 
 	#ifdef _OPENMP
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	#endif
 	for (int i = 0; i < n; i++) {
 		// points[i]‚ªŠ‘®‚·‚é–Ø‚ªŠù’m‚©
