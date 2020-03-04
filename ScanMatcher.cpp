@@ -16,6 +16,11 @@
 #endif
 
 #define NEIGHBOR_
+#define ENABLE_EXECUTION_
+
+#ifdef ENABLE_EXECUTION_
+#include <execution>
+#endif
 
 #ifdef NEIGHBOR_
 const double ScanMatcher::NEIGHBOR_DISTANCE = 500.0; // [mm] Ç±ÇÍÇÊÇËãﬂÇ¢ì_ÇÕÇ≤ãﬂèäÇ≥ÇÒÅB
@@ -314,7 +319,11 @@ std::vector<int> ScanMatcher::random_select(int n, int min, int max) {
 
 std::vector<int> ScanMatcher::sorted_random_select(int n, int min, int max) {
 	std::vector<int> indices = random_select(n, min, max);
+	#ifdef ENABLE_EXECUTION_
+	std::sort(std::execution::par_unseq, indices.begin(), indices.end());
+	#else
 	std::sort(indices.begin(), indices.end());
+	#endif
 	return std::move(indices);
 }
 

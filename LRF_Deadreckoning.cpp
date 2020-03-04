@@ -4,7 +4,13 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+
+#define ENABLE_EXECUTION_
+#define DOWN_SAMPLING_
+
+#ifdef ENABLE_EXECUTION_
 #include <execution>
+#endif
 
 #ifdef DEBUG_OPENCV_
 #include <opencv2/opencv.hpp>
@@ -22,8 +28,6 @@ static const double interval = 0.5;
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-#define DOWN_SAMPLING_
 
 const double LRF_Deadreckoning::SEGMENTATION_DISTANCE = 80.0;
 const double LRF_Deadreckoning::SEGMENTATION_MERGE_RATE = 0.8;
@@ -202,7 +206,11 @@ std::vector<std::vector<double>> LRF_Deadreckoning::segmentation(std::vector<dou
 	}
 
 	// 要素数の多い順にソート
+	#ifdef ENABLE_EXECUTION_
 	std::sort(std::execution::par_unseq, segPoints.begin(), segPoints.end(), [](const std::vector<double>& a, const std::vector<double>& b) { return a.size() > b.size(); });
+	#else
+	std::sort(segPoints.begin(), segPoints.end(), [](const std::vector<double>& a, const std::vector<double>& b) { return a.size() > b.size(); });
+	#endif
 
 	return std::move(segPoints);
 }
@@ -247,7 +255,8 @@ std::vector<std::vector<int>> LRF_Deadreckoning::segmentationIndex(std::vector<d
 	for (int i = 0; i < n; i++) {
 		// points[i]が所属する木が既知か
 		int root = unionFind.find(i);
-		std::vector<int>::iterator iter = std::find(foundParent.begin(), foundParent.end(), root);
+
+		std::vector<int>::iterator iter = std::find(foundParent.begin(), foundParent.end(), root); 
 		int index = std::distance(foundParent.begin(), iter);
 
 		#ifdef _OPENMP
@@ -268,7 +277,11 @@ std::vector<std::vector<int>> LRF_Deadreckoning::segmentationIndex(std::vector<d
 	}
 
 	// 要素数の多い順にソート
+	#ifdef ENABLE_EXECUTION_
+	std::sort(std::execution::par_unseq, segIndices.begin(), segIndices.end(), [](const std::vector<int>& a, const std::vector<int>& b) { return a.size() > b.size(); });
+	#else
 	std::sort(segIndices.begin(), segIndices.end(), [](const std::vector<int>& a, const std::vector<int>& b) { return a.size() > b.size(); });
+	#endif
 
 	return segIndices;
 }
@@ -292,7 +305,11 @@ void LRF_Deadreckoning::mergeIndices(std::vector<std::vector<int>> segIndices, d
 		if (choiceIndices.size() > k) break;
 	}
 
+	#ifdef ENABLE_EXECUTION_
+	std::sort(std::execution::par_unseq, choiceIndices.begin(), choiceIndices.end());
+	#else
 	std::sort(choiceIndices.begin(), choiceIndices.end());
+	#endif
 
 	std::cout << "segment: " << segIndices.size() << std::endl;
 	std::cout << "choice: " << choiceIndices.size() << " > " << k << std::endl;
