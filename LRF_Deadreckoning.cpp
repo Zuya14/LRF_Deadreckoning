@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <execution>
 
 #ifdef DEBUG_OPENCV_
 #include <opencv2/opencv.hpp>
@@ -201,7 +202,7 @@ std::vector<std::vector<double>> LRF_Deadreckoning::segmentation(std::vector<dou
 	}
 
 	// 要素数の多い順にソート
-	std::sort(segPoints.begin(), segPoints.end(), [](const std::vector<double>& a, const std::vector<double>& b) { return a.size() > b.size(); });
+	std::sort(std::execution::par_unseq, segPoints.begin(), segPoints.end(), [](const std::vector<double>& a, const std::vector<double>& b) { return a.size() > b.size(); });
 
 	return std::move(segPoints);
 }
